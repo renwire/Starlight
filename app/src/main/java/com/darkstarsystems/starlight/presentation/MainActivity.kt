@@ -1,9 +1,9 @@
-package com.example.starlight.presentation
+package com.darkstarsystems.starlight.presentation
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -17,43 +17,43 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.wear.compose.material.Button
-import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.TimeText
-import com.example.starlight.recorder.RecordService
+import com.darkstarsystems.starlight.presentation.theme.StarlightTheme
+import com.darkstarsystems.starlight.recorder.RecordService
 
 class MainActivity : ComponentActivity() {
+
+    // Register once on the Activity (required for registerForActivityResult)
+    private val permissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { /* no-op */ }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            MaterialTheme {
+            StarlightTheme {
                 WearRecorderScreen(
-                    requestPermissions = { requestRuntimePermissions(this@MainActivity) },
+                    requestPermissions = { requestRuntimePermissions() },
                     start = { startRecording(this@MainActivity) },
-                    stop = { stopRecording(this@MainActivity) }
+                    stop  = { stopRecording(this@MainActivity) }
                 )
             }
         }
     }
 
-    private fun requestRuntimePermissions(activity: Activity) {
+    /** Request RECORD_AUDIO (+ notifications on 33+) at runtime if missing. */
+    private fun requestRuntimePermissions() {
         val permissions = buildList {
             add(Manifest.permission.RECORD_AUDIO)
             if (Build.VERSION.SDK_INT >= 33) add(Manifest.permission.POST_NOTIFICATIONS)
         }
 
-        // Launch only if something is missing
-        if (permissions.any {
-                ContextCompat.checkSelfPermission(activity, it) !=
-                        android.content.pm.PackageManager.PERMISSION_GRANTED
-            }) {
-            activity.registerForActivityResult(
-                ActivityResultContracts.RequestMultiplePermissions()
-            ) {}.launch(permissions.toTypedArray())
+        val needsAny = permissions.any {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
+        if (needsAny) permissionLauncher.launch(permissions.toTypedArray())
     }
 }
 
@@ -63,14 +63,11 @@ private fun WearRecorderScreen(
     start: () -> Unit,
     stop: () -> Unit
 ) {
-    // Local UI state; service keeps the actual recording alive.
     var isRecording by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { requestPermissions() }
 
-    Scaffold(
-        timeText = { TimeText() }
-    ) {
+    Scaffold(timeText = { TimeText() }) {
         androidx.wear.compose.material.Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -80,11 +77,7 @@ private fun WearRecorderScreen(
         ) {
             Text(if (isRecording) "Recording…" else "Ready", modifier = Modifier.padding(6.dp))
             Button(onClick = {
-                if (isRecording) {
-                    stop()
-                } else {
-                    start()
-                }
+                if (isRecording) stop() else start()
                 isRecording = !isRecording
             }) {
                 Text(if (isRecording) "Stop" else "Record")

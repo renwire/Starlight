@@ -4,14 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.wear.compose.material.MaterialTheme
 
 @Composable
-fun StarlightTheme(
-    content: @Composable () -> Unit
-) {
-    /**
-     * Empty theme to customize for your app.
-     * See: https://developer.android.com/jetpack/compose/designsystems/custom
-     */
-    MaterialTheme(
-        content = content
-    )
+fun StarlightTheme(content: @Composable () -> Unit) {
+    // Uses Wear defaults; override colors/typography later if needed.
+    MaterialTheme(content = content)
 }
