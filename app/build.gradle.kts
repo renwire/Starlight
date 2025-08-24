@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.darkstarsystems.starlight"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.darkstarsystems.starlight"
@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.wear.tooling.preview)
     implementation(libs.activity.compose)
     implementation(libs.core.splashscreen)
+    implementation(libs.work.runtime.ktx)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)

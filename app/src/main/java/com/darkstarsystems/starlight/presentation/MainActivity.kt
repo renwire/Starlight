@@ -8,11 +8,14 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -25,12 +28,17 @@ import com.darkstarsystems.starlight.recorder.RecordService
 
 class MainActivity : ComponentActivity() {
 
-    // Register once on the Activity (required for registerForActivityResult)
-    private val permissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { /* no-op */ }
+    // Declare, but don't register yet.
+    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Register the launcher on the Activity after construction
+        permissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+                // _: Map<String, Boolean> -> // not used
+            }
 
         setContent {
             StarlightTheme {
@@ -49,7 +57,6 @@ class MainActivity : ComponentActivity() {
             add(Manifest.permission.RECORD_AUDIO)
             if (Build.VERSION.SDK_INT >= 33) add(Manifest.permission.POST_NOTIFICATIONS)
         }
-
         val needsAny = permissions.any {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
@@ -68,20 +75,18 @@ private fun WearRecorderScreen(
     LaunchedEffect(Unit) { requestPermissions() }
 
     Scaffold(timeText = { TimeText() }) {
-        androidx.wear.compose.material.Column(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(12.dp),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(if (isRecording) "Recording…" else "Ready", modifier = Modifier.padding(6.dp))
             Button(onClick = {
                 if (isRecording) stop() else start()
                 isRecording = !isRecording
-            }) {
-                Text(if (isRecording) "Stop" else "Record")
-            }
+            }) { Text(if (isRecording) "Stop" else "Record") }
         }
     }
 }
@@ -89,15 +94,11 @@ private fun WearRecorderScreen(
 /* --- Service control helpers --- */
 
 private fun startRecording(context: Context) {
-    val intent = Intent(context, RecordService::class.java).apply {
-        action = RecordService.ACTION_START
-    }
+    val intent = Intent(context, RecordService::class.java).apply { action = RecordService.ACTION_START }
     ContextCompat.startForegroundService(context, intent)
 }
 
 private fun stopRecording(context: Context) {
-    val intent = Intent(context, RecordService::class.java).apply {
-        action = RecordService.ACTION_STOP
-    }
+    val intent = Intent(context, RecordService::class.java).apply { action = RecordService.ACTION_STOP }
     ContextCompat.startForegroundService(context, intent)
 }
