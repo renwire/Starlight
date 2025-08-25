@@ -31,7 +31,7 @@ class RecordService : Service() {
         private const val NOTIF_ID   = 1001
         private const val TAG = "StarlightUpload"
         // TODO: set to your HTTPS endpoint, e.g., https://api.darkstar.dev/transcribe
-        private const val UPLOAD_URL = "https://YOUR_SERVER/transcribe"
+        private const val UPLOAD_URL = "https://darkstardestinations.com/StarlightReceiver"
     }
 
     private var recorder: MediaRecorder? = null
@@ -129,6 +129,7 @@ class RecordService : Service() {
                 requestMethod = "POST"
                 setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
                 setRequestProperty("Connection", "Keep-Alive")
+                setRequestProperty("X-Activity-Key", "G6584-A9638-RENAE-DARK") // <— add this
                 connectTimeout = 20_000
                 readTimeout = 60_000
             }
