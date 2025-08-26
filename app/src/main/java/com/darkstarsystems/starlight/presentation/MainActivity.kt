@@ -28,17 +28,13 @@ import com.darkstarsystems.starlight.recorder.RecordService
 
 class MainActivity : ComponentActivity() {
 
-    // Declare, but don't register yet.
     private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Register the launcher on the Activity after construction
         permissionLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-                // _: Map<String, Boolean> -> // not used
-            }
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { /* no-op */ }
 
         setContent {
             StarlightTheme {
@@ -51,7 +47,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /** Request RECORD_AUDIO (+ notifications on 33+) at runtime if missing. */
     private fun requestRuntimePermissions() {
         val permissions = buildList {
             add(Manifest.permission.RECORD_AUDIO)
@@ -94,11 +89,18 @@ private fun WearRecorderScreen(
 /* --- Service control helpers --- */
 
 private fun startRecording(context: Context) {
-    val intent = Intent(context, RecordService::class.java).apply { action = RecordService.ACTION_START }
+    val intent = Intent(context, RecordService::class.java).apply {
+        action = RecordService.ACTION_START
+    }
+    // We want to (re)start the service in foreground if needed:
     ContextCompat.startForegroundService(context, intent)
 }
 
 private fun stopRecording(context: Context) {
-    val intent = Intent(context, RecordService::class.java).apply { action = RecordService.ACTION_STOP }
-    ContextCompat.startForegroundService(context, intent)
+    val intent = Intent(context, RecordService::class.java).apply {
+        action = RecordService.ACTION_STOP
+    }
+    // Service is already running and has a foreground notification.
+    // Use startService to deliver the command without re-triggering the 5s foreground requirement.
+    context.startService(intent)
 }

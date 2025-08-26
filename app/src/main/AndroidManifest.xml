@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Device capabilities -->
+    <!-- Wear + mic -->
     <uses-feature android:name="android.hardware.type.watch" />
     <uses-feature android:name="android.hardware.microphone" android:required="true"/>
 
@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -39,10 +40,10 @@
             </intent-filter>
         </activity>
 
-        <!-- Foreground recorder -->
+        <!-- Foreground service that keeps heartbeat alive and records/uploads on demand -->
         <service
             android:name=".recorder.RecordService"
             android:exported="false"
-            android:foregroundServiceType="microphone" />
+            android:foregroundServiceType="microphone|mediaPlayback" />
     </application>
 </manifest>
