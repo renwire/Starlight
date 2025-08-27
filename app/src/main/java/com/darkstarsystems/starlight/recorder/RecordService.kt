@@ -80,7 +80,7 @@ class RecordService : Service() {
                 } catch (t: Throwable) {
                     Log.w(TAG, "heartbeat failed", t)
                 }
-                delay(3000) // every 3s
+                delay(700) // every 3s
             }
         }
         Log.i(TAG, "heartbeat loop started")
