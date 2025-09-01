@@ -146,7 +146,7 @@ class RecordService : Service() {
         outputFile = File(dir, "rec_${System.currentTimeMillis()}.m4a")
         Log.i(TAG, "startRecording: ${outputFile?.absolutePath}")
 
-        val r = if (Build.VERSION.SDK_INT >= 31) MediaRecorder(this) else MediaRecorder()
+        @Suppress("DEPRECATION") val r = if (Build.VERSION.SDK_INT >= 31) MediaRecorder(this) else MediaRecorder()
         recorder = r.apply {
             setAudioSource(MediaRecorder.AudioSource.MIC)
             setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
