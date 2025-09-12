@@ -10,10 +10,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,13 +21,11 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.wear.compose.material.Button
-import androidx.wear.compose.material.Scaffold
-import androidx.wear.compose.material.Text
-import androidx.wear.compose.material.TimeText
+import androidx.wear.compose.material.*
 import com.darkstarsystems.starlight.presentation.theme.StarlightTheme
 import com.darkstarsystems.starlight.recorder.RecordService
 import kotlinx.coroutines.delay
+import androidx.wear.compose.material.TimeTextDefaults
 
 class MainActivity : ComponentActivity() {
 
@@ -64,24 +60,22 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/* --- Keep screen awake helper --- */
 @Composable
 private fun KeepScreenOnFor(
     minDurationMillis: Long,
     rearmKey: Any
 ) {
     val view = LocalView.current
-
     LaunchedEffect(rearmKey) {
         view.keepScreenOn = true
         delay(minDurationMillis)
         view.keepScreenOn = false
     }
-
-    DisposableEffect(Unit) {
-        onDispose { view.keepScreenOn = false }
-    }
+    DisposableEffect(Unit) { onDispose { view.keepScreenOn = false } }
 }
 
+/* --- UI --- */
 @Composable
 private fun WearRecorderScreen(
     requestPermissions: () -> Unit,
@@ -109,28 +103,46 @@ private fun WearRecorderScreen(
 
     LaunchedEffect(Unit) { requestPermissions() }
 
-    Scaffold(timeText = { TimeText() }) {
-        Column(
+    Scaffold(timeText = {
+        TimeText(timeTextStyle = TimeTextDefaults.timeTextStyle(
+            color = MaterialTheme.colors.onBackground
+        ))
+    }) {
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .background(MaterialTheme.colors.background) // pure black
         ) {
-            Text(if (isRecording) "Recording…" else "Ready", modifier = Modifier.padding(6.dp))
-            Button(onClick = {
-                if (isRecording) stop() else start()
-                isRecording = !isRecording
-                tapTick++ // re-arm the 10s window on each tap
-            }) {
-                Text(if (isRecording) "Stop" else "Record")
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    if (isRecording) "Recording…" else "Ready",
+                    modifier = Modifier.padding(6.dp),
+                    color = MaterialTheme.colors.onBackground
+                )
+                OutlinedButton(
+                    onClick = {
+                        if (isRecording) stop() else start()
+                        isRecording = !isRecording
+                        tapTick++ // re-arm the 10s window on each tap
+                    },
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colors.onBackground
+                    )
+                ) {
+                    Text(if (isRecording) "Stop" else "Record")
+                }
             }
         }
     }
 }
 
 /* --- Service control helpers --- */
-
 private fun startRecording(context: Context) {
     val intent = Intent(context, RecordService::class.java).apply {
         action = RecordService.ACTION_START
