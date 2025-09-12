@@ -34,6 +34,7 @@ class PollService : Service() {
     private var heartbeatJob: Job? = null
     private var autoPlay = false
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate() {
         super.onCreate()
         createChannel()
@@ -46,6 +47,7 @@ class PollService : Service() {
         scope.cancel()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_START -> {
@@ -196,6 +198,7 @@ class PollService : Service() {
 
     /* ---------------- Notifications ---------------- */
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun createChannel() {
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (nm.getNotificationChannel(CHANNEL_ID) == null) {
