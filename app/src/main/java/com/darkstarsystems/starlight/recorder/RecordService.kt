@@ -98,6 +98,7 @@ class RecordService : Service() {
             requestMethod = "POST"
             doOutput = true
             doInput = true
+            setRequestProperty("X-Device-Type", "watch")
             setRequestProperty("X-Activity-Key", ACTIVITY_KEY)
             setRequestProperty("Content-Type", "application/json")
             connectTimeout = 5000
