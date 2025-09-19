@@ -27,18 +27,20 @@ class PollService : Service() {
         private const val TAG = "StarlightPhone"
 
         private const val SERVER_URL = "https://darkstardestinations.com/StarlightReceiver"
-        private const val ACTIVITY_KEY = "G6584-A9638-RENAE-DARK"
+        private const val ACTIVITY_KEY = "fcb892d2-b508-47a2-b0d7-0a937d139b5cVBNiabnLb9z9rrgW6ZKwtXjwguSS64K8LfHFnMQwYDE="
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var heartbeatJob: Job? = null
     private var autoPlay = false
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate() {
         super.onCreate()
         createChannel()
         startForeground(NOTIF_ID, buildNotification("Starlight idle"))
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -46,6 +48,7 @@ class PollService : Service() {
         scope.cancel()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_START -> {
@@ -77,7 +80,7 @@ class PollService : Service() {
                 } catch (t: Throwable) {
                     Log.w(TAG, "heartbeat error", t)
                 }
-                delay(3000)
+                delay(15000)
             }
         }
     }
@@ -88,12 +91,18 @@ class PollService : Service() {
     }
 
     private fun pollServer(): File? {
+        val apiKey = MainActivity.LoginStash.getApiKey(this)
+        if (apiKey.isNullOrBlank()) {
+            Log.w(TAG, "No API key found in LoginStash")
+            return null
+        }
+
         val url = URL(SERVER_URL)
         val conn = (url.openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             doOutput = true
             setRequestProperty("X-Device-Type", "phone")
-            setRequestProperty("X-Activity-Key", ACTIVITY_KEY)
+            setRequestProperty("X-Activity-Key", apiKey)  // ✅ use LoginStash
             setRequestProperty("Content-Type", "application/json")
             connectTimeout = 5000
             readTimeout = 5000
@@ -196,6 +205,7 @@ class PollService : Service() {
 
     /* ---------------- Notifications ---------------- */
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun createChannel() {
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (nm.getNotificationChannel(CHANNEL_ID) == null) {

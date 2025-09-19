@@ -1,5 +1,6 @@
 package com.darkstarsystems.starlight_assistance
 
+import android.content.Context
 import android.content.Intent
 import android.media.*
 import android.os.Build
@@ -23,6 +24,8 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import com.darkstarsystems.starlight_assistance.ui.theme.StarlightTheme
+import com.google.android.gms.wearable.PutDataMapRequest
+import com.google.android.gms.wearable.Wearable
 
 class MainActivity : ComponentActivity() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -30,12 +33,51 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+        // 1) Login check
+        val apiKey = LoginStash.getApiKey(this)
+        if (apiKey == null) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
+        }
+
         setContent {
             StarlightTheme {
                 PhoneDashboard()
             }
         }
+
     }
+
+
+    object LoginStash {
+        private const val PREF_NAME = "darkstar_prefs"
+        private const val KEY_API = "api_key"
+
+        fun getApiKey(context: Context): String? {
+            val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            return prefs.getString(KEY_API, null)
+        }
+
+        fun saveApiKey(context: Context, apiKey: String) {
+            val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            prefs.edit().putString(KEY_API, apiKey).apply()
+
+            // send to watch
+            val putDataReq = PutDataMapRequest.create("/api_key").apply {
+                dataMap.putString("apiKey", apiKey)
+            }.asPutDataRequest().setUrgent()
+            Wearable.getDataClient(context).putDataItem(putDataReq)
+        }
+
+        fun clear(context: Context) {
+            val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            prefs.edit().remove(KEY_API).commit()
+        }
+    }
+
 
     override fun onDestroy() {
         super.onDestroy()

@@ -1,5 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Starlight" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Global app theme (Compose + Activities) -->
+    <style name="Theme.Starlight" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/darkstar_primary</item>
+        <item name="colorPrimaryVariant">@color/darkstar_accent</item>
+        <item name="colorOnPrimary">@color/darkstar_text</item>
+        <item name="android:statusBarColor">@color/darkstar_background</item>
+        <item name="android:navigationBarColor">@color/darkstar_background</item>
+        <item name="android:windowBackground">@color/darkstar_background</item>
+    </style>
+
+    <!-- Login screen theme -->
+    <style name="Theme.DarkstarLogin" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/darkstar_primary</item>
+        <item name="colorPrimaryVariant">@color/darkstar_accent</item>
+        <item name="colorOnPrimary">@color/darkstar_text</item>
+        <item name="android:statusBarColor">@color/darkstar_background</item>
+        <item name="android:navigationBarColor">@color/darkstar_background</item>
+        <item name="android:windowBackground">@color/darkstar_background</item>
+    </style>
+
 </resources>

@@ -36,7 +36,7 @@ class RecordService : Service() {
 
         private const val UPLOAD_URL = "https://darkstardestinations.com/StarlightReceiver"
         private const val HEARTBEAT_URL = "https://darkstardestinations.com/StarlightReceiver"
-        private const val ACTIVITY_KEY = "G6584-A9638-RENAE-DARK"
+        private const val ACTIVITY_KEY = "fcb892d2-b508-47a2-b0d7-0a937d139b5cVBNiabnLb9z9rrgW6ZKwtXjwguSS64K8LfHFnMQwYDE="
     }
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -67,6 +67,12 @@ class RecordService : Service() {
         return START_STICKY
     }
 
+    private fun getApiKey(): String? {
+        val prefs = getSharedPreferences("darkstar_prefs", Context.MODE_PRIVATE)
+        return prefs.getString("api_key", null)
+    }
+
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     /* ---------------- Heartbeat (3s) ---------------- */
@@ -80,7 +86,7 @@ class RecordService : Service() {
                 } catch (t: Throwable) {
                     Log.w(TAG, "heartbeat failed", t)
                 }
-                delay(700) // every 3s
+                delay(15000) // every 3s
             }
         }
         Log.i(TAG, "heartbeat loop started")
